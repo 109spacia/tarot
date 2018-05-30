@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>タロットカードシャッフルアニメーション試作 全自動ver</title>
+        <link href="css/index.css" rel="stylesheet" type="text/css" media="all">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script>
+            $(function() {
+                
+                function play_anim (){
+                    // .then(関数名)で関数を繋げる
+                    anim_shuffle()
+                        .then(anim_collect)
+                        .then(anim_fetch_card)
+                        .then(anim_rotate_card)
+                        .then(anim_rotate_card_res)
+                        .then(anim_finish);
+                }
+                
+                $('#btn').on('click', function() {
+                    console.log("click");
+                    console.log($('#msg').text());
+                    if ($('#msg').text() === "占ってみる") {
+                        $('#btn').css({"visibility":"hidden"});
+                        play_anim();
+                    } else {
+                        // 結果画面へ
+                        location.href = "./";
+                    }
+                });
+                
+                // シャッフル
+                function anim_shuffle () {
+                    console.log("anim_shuffle");
+                    var d = new $.Deferred;
+                    var counter = 1;
+                    var range = 150;
+                    var timer = setInterval(function () {
+                        $(".card").each(function () {
+                            var rand_x = Math.random() * range;
+                            var rand_y = Math.random() * range;
+                            var rand_sgn_x = Math.random() < 0.5 ? 1 : -1;
+                            var rand_sgn_y = Math.random() < 0.5 ? 1 : -1;
+                            var offset_x = rand_x * rand_sgn_x + 200;
+                            var offset_y = rand_y * rand_sgn_y + 200;
+                            $(this).animate({"left" : offset_x + "px", "top": offset_y + "px"}, 500);
+                        });
+                        if (++counter === 10) {
+                            clearInterval(timer);
+                            d.resolve();
+                        }
+                    }, 500);
+                    return d.promise();
+                }
+
+                // 中央に集まる
+                function anim_collect () {
+                    console.log("anim_collect");
+                    var d = new $.Deferred;
+                    $(".card").each(function(index) {
+                        console.log("anim_collect"+":"+index);
+                        //$(this).animate({"left":ox-index,"top":oy+index}, 80, function() {    // 重なって見えるver
+                        $(this).animate({"left":"42.3%","top":"40%"}, 80, function() {
+                            d.resolve();
+                        });
+                    });
+                    return d.promise();
+                }
+                
+                // 一枚取り出す
+                function anim_fetch_card () {
+                    console.log("anim_fetch_card");
+                    var d = new $.Deferred;
+                    
+                    $(".card").eq(21).delay(500).animate({
+                        "width" : "43%",
+                        "top"   : "22%",
+                        "left"  : "28.5%"
+                    }, 500, function () {
+                        d.resolve();
+                    });
+                    
+                    return d.promise();
+                }
+                
+                // 回転(裏)
+                function anim_rotate_card () {
+                    console.log("anim_rotate_card");
+                    var d = new $.Deferred;
+                    
+                    $(".card").eq(21).css({
+                        "transition" : "1s",
+                        "transform" : "rotateY(90deg)",
+                        "-webkit-transform" : "rotateY(90deg)",
+                        "-moz-transform" : "rotateY(90deg)"
+                    });
+                    
+                    d.resolve();
+                    return d.promise();
+                }
+                
+                // 回転(結果)
+                function anim_rotate_card_res () {
+                    console.log("anim_rotate_card_res");
+                    var d = new $.Deferred;
+                    
+                    setTimeout(function() {
+                        $(".card_res").css({
+                            "transition" : "1s",
+                            "transform" : "rotateY(0deg)",
+                            "-webkit-transform" : "rotateY(0deg)",
+                            "-moz-transform" : "rotateY(0deg)"
+                        }); 
+                    }, 1000);
+                    
+                    d.resolve();
+                    return d.promise();
+                }
+                
+               function anim_finish () {
+                   setTimeout(function() {
+                        $('#btn').css({"visibility":"visible"});
+                        $('#msg').html("結果を見る");
+                   }, 1500);
+                }
+            });
+        </script>
+    </head>
+    <body>
+        <div class="box">
+            <img class="card" src="image/card.png" alt=" 0">
+            <img class="card" src="image/card.png" alt=" 1">
+            <img class="card" src="image/card.png" alt=" 2">
+            <img class="card" src="image/card.png" alt=" 3">
+            <img class="card" src="image/card.png" alt=" 4">
+            <img class="card" src="image/card.png" alt=" 5">
+            <img class="card" src="image/card.png" alt=" 6">
+            <img class="card" src="image/card.png" alt=" 7">
+            <img class="card" src="image/card.png" alt=" 8">
+            <img class="card" src="image/card.png" alt=" 9">
+            <img class="card" src="image/card.png" alt="10">
+            <img class="card" src="image/card.png" alt="11">
+            <img class="card" src="image/card.png" alt="12">
+            <img class="card" src="image/card.png" alt="13">
+            <img class="card" src="image/card.png" alt="14">
+            <img class="card" src="image/card.png" alt="15">
+            <img class="card" src="image/card.png" alt="16">
+            <img class="card" src="image/card.png" alt="17">
+            <img class="card" src="image/card.png" alt="18">
+            <img class="card" src="image/card.png" alt="19">
+            <img class="card" src="image/card.png" alt="10">
+            <img class="card" src="image/card.png" alt="21">
+            <!-- 結果のカード -->
+            <img class="card_res" src="image/card_res.jpg" alt="結果">
+        </div>
+        <button id="btn" type=button>
+            <span id="msg">占ってみる</span>
+        </button>
+    </body>
+</html>
