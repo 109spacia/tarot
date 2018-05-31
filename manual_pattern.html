@@ -4,22 +4,42 @@
       <meta charset="utf-8">
       <title>ユーザ操作パターン</title>  
     <style>
-      body {
-        margin: 0px;
-        padding: 0px;
-      }
-      #box {
-        margin: 10px;
-        border: 1px solid black;
-        width : 500px;
-        height : 500px;
-        position: relative;
-       }
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+        #box {
+            margin: 10px;
+            border: 1px solid black;
+            width: 600px;
+            height: 500px;
+            position: relative;
+        }
+        #msg {
+            text-align: center;
+            padding: 3%;
+            font-size: 18px;
+            margin-right: 6%;
+        }
+        button {
+            margin: 2% 0 0 33%;
+            font-size: 30px;
+        }
        .card {
            position: absolute;
        }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        $(function() {
+            var agent = navigator.userAgent;
+            if (agent.search(/iPhone/) > -1 || agent.search(/iPad/) > -1 || agent.search(/iPod/) > -1 || agent.search(/Android/) > -1) {
+                $('#msg').text('スワイプしてカードをシャッフルしよう');
+            } else {
+                $('#msg').text('マウスポインタを動かしてカードをシャッフルしよう');
+            }
+        });
+    </script>
     <script>
         $(function() {
             // 終了ボタンを押したらtrueにする
@@ -37,9 +57,15 @@
                 cards = [];
                 $(".card").each(function (idx) {
                     var off = $(this).offset();
-                    var x = idx % 5;
-                    var y = parseInt(idx / 5);
-                    cards.push(new Card(off.left + x * 100, 10 + y * 90));
+                    // 0,...,17
+                    var x = idx % 6;
+                    if (idx < 18) {
+                        var y = parseInt(idx / 6);
+                        cards.push(new Card(off.left + x * 100, 10 + y * 120));
+                    } else {
+                        // 18,19,20,21
+                        cards.push(new Card(off.left + (x + 1) * 100, 370));
+                    }
                 });
                 return cards;
             }
@@ -192,30 +218,32 @@
     </script>
   </head>
   <body>
+    <div id="msg"></div>
     <div id="box">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
-          <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
+      <img class="card" src="image/card.png" alt="">
     </div>
+    <button id="btn" type=button onclick="location.href='hoge'">結果を見る</button>
   </body>
 </html>
       
