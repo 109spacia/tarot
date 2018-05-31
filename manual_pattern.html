@@ -77,8 +77,8 @@
 
                     var totalDist = Math.abs(distX) + Math.abs(distY);
 
-                    var forceX = (Math.abs(distX) / totalDist) * (1 / radius) * mouseForceMultiplier;
-                    var forceY = (Math.abs(distY) / totalDist) * (1 / radius) * mouseForceMultiplier;
+                    var forceX = Math.abs(distX) / totalDist / radius * mouseForceMultiplier;
+                    var forceY = Math.abs(distY) / totalDist / radius * mouseForceMultiplier;
           
                     if (Math.abs(distX) < 100) {
                         if(distX > 0) {// mouse is left of card
@@ -158,6 +158,26 @@
             });
 
             $('#box')[0].addEventListener('mouseout', function() {
+                mousePos.x = 9999;
+                mousePos.y = 9999;
+            });
+            
+            /* タッチの開始時のイベント */
+            $('#box').bind('touchstart', function() {
+                event.preventDefault();                     // ページが動いたり、反応を止める（A タグなど）
+                mousePos.x = event.changedTouches[0].pageX; // X 座標の位置
+                mousePos.y = event.changedTouches[0].pageY; // Y 座標の位置
+            });
+            
+            /* タッチしたまま動かしたときのイベント */
+            $('#box').bind('touchmove', function() {
+                event.preventDefault();                     // ページが動くのを止める
+                mousePos.x = event.changedTouches[0].pageX; // X 座標の位置
+                mousePos.y = event.changedTouches[0].pageY; // Y 座標の位置
+            });
+            
+            /* タッチ状態から離れたときのイベント */
+            $('#box').bind('touchend', function() {
                 mousePos.x = 9999;
                 mousePos.y = 9999;
             });
