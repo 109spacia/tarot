@@ -1,62 +1,68 @@
 <!DOCTYPE HTML>
 <html>
   <head>
+      <meta charset="utf-8">
+      <title>ユーザ操作パターン</title>  
     <style>
       body {
         margin: 0px;
         padding: 0px;
       }
-      canvas {
-          margin: 10px;
-          border: 1px solid black;
-      }
+      #box {
+        margin: 10px;
+        border: 1px solid black;
+        width : 500px;
+        height : 500px;
+        position: relative;
+       }
+       .card {
+           position: absolute;
+       }
     </style>
-  </head>
-  <body>
-    <canvas id="myCanvas" width="500" height="500"></canvas>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
-        $(function() { 
-            var height_card = 90;
-            var width_card = 120;
-            var width_half_card = width_card / 2;
-      
-            window.requestAnimFrame = (function() {
-                return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
-                    function(callback) {
-                        window.setTimeout(callback, 16.7);  // 16.7 ≒ 1000 / 60
-                    };
-            })();
+        $(function() {
+            // 終了ボタンを押したらtrueにする
+            var flg = false;
+            
+            var box = $('#box');
+            const height_card = 90;
+            const width_card = 120;
+            const lim_right  = box.width() - width_card / 2 - 20;
+            const lim_bottom = box.height() - height_card - 17;
+            var lastTime = new Date().getTime();
       
             // ボールの初期配置
             function initCards() {
                 cards = [];
-                // 最初は整列した方がいいかも
-                for (var i = 0; i < 22; i++)
-                    cards.push(new Card(Math.random() * 400, Math.random() * 400));
+                $(".card").each(function (idx) {
+                    var off = $(this).offset();
+                    var x = idx % 5;
+                    var y = parseInt(idx / 5);
+                    cards.push(new Card(off.left + x * 100, 10 + y * 90));
+                });
                 return cards;
             }
       
             // マウスの座標を取得
-            function getMousePos(canvas, evt) {
+            function getMousePos(box, evt) {
         
                 // 相対的なマウス位置を計算
-                var mouseX = evt.clientX - canvas.offsetLeft + window.pageXOffset;
-                var mouseY = evt.clientY - canvas.offsetTop + window.pageYOffset;
+                var mouseX = evt.clientX - box.offsetLeft + window.pageXOffset;
+                var mouseY = evt.clientY - box.offsetTop + window.pageYOffset;
         
                 return {
                     x: mouseX,
                     y: mouseY
                 };
             }
-      
-            function updateCards(canvas, cards, timeDiff, mousePos) {
-                var collisionDamper = 0.3;
-                var floorFriction = 0.005 * timeDiff;
+            
+            function updateCards(cards, timeDiff, mousePos) {
+                var collisionDamper = -0.7;
                 
                 // マウスが触れた時の動き具合
-                var mouseForceMultiplier = 5 * timeDiff;
-
+                var mouseForceMultiplier = Math.max(1000 / timeDiff, 0);
+                
                 for (var i = 0, len = cards.length; i < len; i++) {
                     var card = cards[i];
                     // set card position based on velocity
@@ -75,106 +81,65 @@
                     var forceY = (Math.abs(distY) / totalDist) * (1 / radius) * mouseForceMultiplier;
           
                     if (Math.abs(distX) < 100) {
-                      if(distX > 0) {// mouse is left of card
-                        card.vx += forceX;
-                      }
-                      else {
-                        card.vx -= forceX;
-                      }   
+                        if(distX > 0) {// mouse is left of card
+                            card.vx += forceX;
+                        }
+                        else {
+                            card.vx -= forceX;
+                        }
+                        lastTime = new Date().getTime();
                     }
 
                     if (Math.abs(distY) < 100) {
-                      if(distY > 0) {// mouse is on top of card
-                        card.vy += forceY;
-                      }
-                      else {
-                        card.vy -= forceY;
-                      }
-                    }
-
-                    // floor friction
-                    if(card.vx > 0) {
-                      card.vx -= floorFriction;
-                    }
-                    else if(card.vx < 0) {
-                      card.vx += floorFriction;
-                    }
-                    if(card.vy > 0) {
-                      card.vy -= floorFriction;
-                    }
-                    else if(card.vy < 0) {
-                      card.vy += floorFriction;
+                        if(distY > 0) {// mouse is on top of card
+                            card.vy += forceY;
+                        }
+                        else {
+                            card.vy -= forceY;
+                        }
+                        lastTime = new Date().getTime();
+                        
                     }
 
                     // 床に触れたか
-                    if(card.y > canvas.height - height_card - 30) {
-                      card.y = canvas.height - height_card - 30;
-                      card.vy *= (collisionDamper - 1);
+                    if(card.y > lim_bottom) {
+                      card.y = lim_bottom;
+                      card.vy *= collisionDamper;
                     }
 
                     // 天井に触れたか
                     if(card.y < 0) {
                       card.y = 0;
-                      card.vy *= (collisionDamper - 1);
+                      card.vy *= collisionDamper;
                     }
 
                     // 右の壁に触れたか
-                    if(card.x > canvas.width - width_half_card - 30) {
-                      card.x = canvas.width - width_half_card - 30;
-                      card.vx *= (collisionDamper - 1);
+                    if(card.x > lim_right) {
+                      card.x = lim_right;
+                      card.vx *= collisionDamper;
                     }
 
                     // 左の壁に触れたか
                     if(card.x < 0) {
                       card.x = 0;
-                      card.vx *= (collisionDamper - 1);
+                      card.vx *= collisionDamper;
                     }
+                    
+                    $(".card").eq(i).css({
+                        "left" : card.x,
+                        "top"  : card.y
+                    });
                 }
             }
       
-            // x,y   : 描画位置
-            // vx,vy : 初期値0,0
+            // x,y : カード左端の(x,y)座標
             function Card(x, y) {
                 this.x = x;
                 this.y = y;
                 this.vx = 0;
                 this.vy = 0;
-                this.color = '#FF00FF';
             }
       
-            function animate(canvas, cards, lastTime, mousePos) {
-                var context = canvas.getContext('2d');
-
-                // 更新
-                const date = new Date();
-                const time = date.getTime();
-                updateCards(canvas, cards, time - lastTime, mousePos);
-
-                // キャンバスのクリア
-                context.clearRect(0, 0, canvas.width, canvas.height);
-
-                // すべてのカードを再描画
-                for(var i = 0, len = cards.length; i < len; i++) {
-                    var card = cards[i];
-
-                    // おまじない
-                    context.beginPath();
-
-                    // カードを描画================================
-                    var img = new Image();
-                    img.src = "image/card.png";
-                    context.drawImage(img, card.x, card.y, height_card, width_card);
-                    //============================================
-                }
-
-                // 新しいフレームのリクエスト
-                // 上の設定でanimateを実行
-                requestAnimFrame(function() {
-                    animate(canvas, cards, time, mousePos);
-                });
-            }
-      
-            var canvas = document.getElementById('myCanvas');
             var cards = initCards();
             
             /*
@@ -186,20 +151,51 @@
               y: 9999
             };
 
-            canvas.addEventListener('mousemove', function(evt) {
-                var pos = getMousePos(canvas, evt);
+            $('#box')[0].addEventListener('mousemove', function(evt) {
+                var pos = getMousePos($('#box')[0], evt);
                 mousePos.x = pos.x;
                 mousePos.y = pos.y;
             });
 
-            canvas.addEventListener('mouseout', function() {
+            $('#box')[0].addEventListener('mouseout', function() {
                 mousePos.x = 9999;
                 mousePos.y = 9999;
             });
-
-            animate(canvas, cards, new Date().getTime(), mousePos);
+            
+            var timer = setInterval(function () {
+                updateCards(cards, new Date().getTime() - lastTime, mousePos);
+                if (flg) {
+                    clearInterval(timer);
+                }
+            }, 1500 / 60);
         });
     </script>
+  </head>
+  <body>
+    <div id="box">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+          <img class="card" src="image/card.png" alt="">
+    </div>
   </body>
 </html>
       
